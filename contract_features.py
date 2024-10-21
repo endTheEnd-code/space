@@ -91,4 +91,20 @@ def calc_disb_bank_loan_wo_tbc(df):
 sum_of_loan_summa = calc_disb_bank_loan_wo_tbc(df_final)
 df_final = df_final.merge(sum_of_loan_summa, on='claim_date', how='left')
 df_final['disb_bank_loan_wo_tbc'] = df_final['disb_bank_loan_wo_tbc'].fillna(-3)
+
+#compute Number of days since last loan. 
+def calc_day_sinlastloan(df):
+  days_df = df.copy()
+  days_df = df_final[~(df_final['summa'].isna())]
+  last_loan = days_df.groupby(by='contract_id').agg({'contract_date':'max'}).reset_index().rename(columns={'contract_date':'last_loan_date'})
+  days_df = days_df.merge(last_loan, on='contract_id')
+  days_df['application_date'] = pd.to_datetime(days_df['application_date'], errors='coerce')  #handle not date values with errors parameter
+  days_df['application_date'] = days_df['application_date'].dt.tz_localize(None)  #remove timezones
+  days_df['day_sinlastloan'] = (pd.to_datetime(days_df['last_loan_date']) - pd.to_datetime(days_df['application_date'])).dt.days
+  days_df = days_df[['id', 'day_sinlastloan']]
+  return days_df
+
+days_df = calc_day_sinlastloan(df_final)
+df_final = df_final.merge(days_df, on='id', how='left')
+df_final['day_sinlastloan'] = np.where(df_final['claim_id'].isnull(), -3, df_final['day_sinlastloan'])
 df_final.head()
