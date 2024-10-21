@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 from datetime import datetime
+import numpy as np 
 
 # Load the CSV
 df = pd.read_csv('C:/Users/Ana/Desktop/DE Assessment/data.csv')
@@ -107,4 +108,6 @@ def calc_day_sinlastloan(df):
 days_df = calc_day_sinlastloan(df_final)
 df_final = df_final.merge(days_df, on='id', how='left')
 df_final['day_sinlastloan'] = np.where(df_final['claim_id'].isnull(), -3, df_final['day_sinlastloan'])
-df_final.head()
+
+#every results save in contract_features.csv
+df_final('contract_features.csv', index = False)
