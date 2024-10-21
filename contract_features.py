@@ -43,6 +43,18 @@ if expanded_rows:
     df_final = df_final.drop(columns=['original_index'])
 else:
     df_final = df.copy()
+
+#transform dataframe, drop columns which we don't need anymore for further computation. fill missing values
+def transform_dataframe(df_final):
+  df_final = df_final.drop(columns=['contracts', 'parsed_contracts'])
+  df_final = df_final.drop_duplicates().reset_index(drop=True)
+  df_final['contract_date'] = df_final['contract_date'].apply(lambda x: pd.to_datetime(x) if x is not None else None)
+  df_final['summa'] = df_final['summa'].replace("", None)
+  df_final['claim_date'] = pd.to_datetime(df_final['claim_date'])
+  df_final['loan_summa'] = df_final['loan_summa'].replace("", 0)
+
+  return df_final
+df_final = transform_dataframe(df_final)
 df_final.head()
 
 
