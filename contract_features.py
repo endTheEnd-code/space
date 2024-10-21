@@ -110,4 +110,4 @@ df_final = df_final.merge(days_df, on='id', how='left')
 df_final['day_sinlastloan'] = np.where(df_final['claim_id'].isnull(), -3, df_final['day_sinlastloan'])
 
 #every results save in contract_features.csv
-df_final('contract_features.csv', index = False)
+df_final.to_csv('contract_features.csv', index = False)
