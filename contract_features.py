@@ -72,4 +72,23 @@ num_claims = calc_tot_claim_cnt_l180d(df_final)
 #now merge with base dataframe
 df_final = df_final.merge(num_claims, on='claim_date', how='left')
 df_final['tot_claim_cnt_l180d'] = df_final['tot_claim_cnt_l180d'].fillna(-3)
+
+#sum of loans but without tbc loans
+def calc_disb_bank_loan_wo_tbc(df):
+  loan_summa_df = df.copy()
+  loan_summa_df = loan_summa_df[~
+    (
+      (loan_summa_df['bank'].isna())
+      |
+      (loan_summa_df['bank'].isin(['LIZ', 'LOM', 'MKO', 'SUG']))
+      |
+      (loan_summa_df['contract_date'].isna())
+    )
+  ]
+  sum_of_loan_summa = loan_summa_df.groupby(by='claim_date').agg({"loan_summa":'sum'}).reset_index().rename(columns={'loan_summa':'disb_bank_loan_wo_tbc'})
+  return sum_of_loan_summa
+
+sum_of_loan_summa = calc_disb_bank_loan_wo_tbc(df_final)
+df_final = df_final.merge(sum_of_loan_summa, on='claim_date', how='left')
+df_final['disb_bank_loan_wo_tbc'] = df_final['disb_bank_loan_wo_tbc'].fillna(-3)
 df_final.head()
