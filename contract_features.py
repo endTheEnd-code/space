@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+from datetime import datetime
 
 # Load the CSV
 df = pd.read_csv('C:/Users/Ana/Desktop/DE Assessment/data.csv')
@@ -55,6 +56,20 @@ def transform_dataframe(df_final):
 
   return df_final
 df_final = transform_dataframe(df_final)
+
+ 
+#count number of claims for last 180 days under feature name tot_claim_cnt_l180d
+def calc_tot_claim_cnt_l180d(df):
+    num_claims = df.copy()
+    last_180 = datetime.today() - pd.DateOffset(days=180)
+    num_claims = num_claims[num_claims['claim_date'] >= last_180]
+    num_claims = num_claims.groupby(by='claim_date').agg({"claim_id":'count'}).reset_index().rename(columns={'claim_id':'tot_claim_cnt_l180d'})
+    return num_claims
+
+#dataframe of claims for last 180 days
+num_claims = calc_tot_claim_cnt_l180d(df_final)
+
+#now merge with base dataframe
+df_final = df_final.merge(num_claims, on='claim_date', how='left')
+df_final['tot_claim_cnt_l180d'] = df_final['tot_claim_cnt_l180d'].fillna(-3)
 df_final.head()
-
-
